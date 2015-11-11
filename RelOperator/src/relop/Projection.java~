@@ -50,7 +50,7 @@ public class Projection extends Iterator {
 			}
 		}
 
-		it.setSchema(projectedSchema);
+//		it.setSchema(projectedSchema);
   }
 
   /**

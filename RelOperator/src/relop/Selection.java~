@@ -69,6 +69,6 @@ public class Selection extends Iterator {
   }
 
 	public Schema getSchema() {
-		return it.getSchema();
+		return it.schema;
 	}
 }

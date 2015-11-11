@@ -1,7 +1,10 @@
 package relop;
 
 import global.RID;
+import relop.Tuple;
 import heap.HeapFile;
+import heap.HeapScan;
+
 
 /**
  * Wrapper for heap file scan, the most basic access method. This "iterator"
@@ -11,9 +14,13 @@ public class FileScan extends Iterator {
 
 	private Schema schema;
 	private HeapFile file;
+	private HeapScan heapScan;
 
-	private boolean start = true;
+	private boolean start;
 	private boolean isOpen;
+
+	private RID lastRID;
+
 
   /**
    * Constructs a file scan, given the schema and heap file.
@@ -21,6 +28,9 @@ public class FileScan extends Iterator {
   public FileScan(Schema schema, HeapFile file) {
 		this.schema = schema;
 		this.file = file;
+
+		heapScan = file.openScan();
+		start = true;
   }
 
   /**
@@ -28,13 +38,14 @@ public class FileScan extends Iterator {
    * child iterators, and increases the indent depth along the way.
    */
   public void explain(int depth) {
-    throw new UnsupportedOperationException("Not implemented");
   }
 
   /**
    * Restarts the iterator, i.e. as if it were just constructed.
    */
   public void restart() {
+		close();
+		heapScan = file.openScan();
 		start = true;
     isOpen = true;
   }
@@ -50,6 +61,7 @@ public class FileScan extends Iterator {
    * Closes the iterator, releasing any resources (i.e. pinned pages).
    */
   public void close() {
+		heapScan.close();
     isOpen = false;
   }
 
@@ -57,7 +69,7 @@ public class FileScan extends Iterator {
    * Returns true if there are more tuples, false otherwise.
    */
   public boolean hasNext() {
-		return false;
+		return heapScan.hasNext();
   }
 
   /**
@@ -66,18 +78,24 @@ public class FileScan extends Iterator {
    * @throws IllegalStateException if no more tuples
    */
   public Tuple getNext() {
-		isOpen = true;
 
 		if (start) {
+			lastRID = new RID();
 			start = false;
 		}
+		
+		byte[] data = heapScan.getNext(lastRID);
+		return new Tuple(schema, data);
   }
 
   /**
    * Gets the RID of the last tuple returned.
    */
   public RID getLastRID() {
-    throw new UnsupportedOperationException("Not implemented");
+    return lastRID;
   }
 
+	public Schema getSchema() {
+		return schema;
+	}
 }

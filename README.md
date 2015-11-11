@@ -1,3 +1,0 @@
-# proj3
-
-README

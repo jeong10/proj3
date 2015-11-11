@@ -2,7 +2,11 @@ package relop;
 
 import global.SearchKey;
 import heap.HeapFile;
+import heap.HeapScan;
 import index.HashIndex;
+import index.HashScan;
+import global.RID;
+
 
 /**
  * Wrapper for hash scan, an index access method.
@@ -14,7 +18,8 @@ public class KeyScan extends Iterator {
 	private SearchKey key;
 	private HeapFile file;
 
-	private boolean start = true;
+	private HashScan hashScan;
+
 	private boolean isOpen = false;
 
   /**
@@ -25,6 +30,9 @@ public class KeyScan extends Iterator {
 		this.index = index;
 		this.key = key;
 		this.file = file;
+
+		hashScan = index.openScan(key);
+		isOpen = true;
   }
 
   /**
@@ -32,14 +40,15 @@ public class KeyScan extends Iterator {
    * child iterators, and increases the indent depth along the way.
    */
   public void explain(int depth) {
-    throw new UnsupportedOperationException("Not implemented");
+    
   }
 
   /**
    * Restarts the iterator, i.e. as if it were just constructed.
    */
   public void restart() {
-		start = true;
+		close();
+		hashScan = index.openScan(key);
 		isOpen = true;
   }
 
@@ -54,6 +63,7 @@ public class KeyScan extends Iterator {
    * Closes the iterator, releasing any resources (i.e. pinned pages).
    */
   public void close() {
+		hashScan.close();
 		isOpen = false;
   }
 
@@ -61,7 +71,7 @@ public class KeyScan extends Iterator {
    * Returns true if there are more tuples, false otherwise.
    */
   public boolean hasNext() {
-		return false;
+		return hashScan.hasNext();
   }
 
   /**
@@ -70,11 +80,14 @@ public class KeyScan extends Iterator {
    * @throws IllegalStateException if no more tuples
    */
   public Tuple getNext() {
-    isOpen = true;
 
-		if (start) {
-			start = false;
-		}
+		RID rid = hashScan.getNext();
+		byte[] data = file.selectRecord(rid);
+
+		return new Tuple(schema, data);
   }
 
+	public Schema getSchema() {
+		return schema;
+	}
 }
