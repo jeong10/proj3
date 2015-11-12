@@ -10,8 +10,7 @@ public class Selection extends Iterator {
 	private Iterator it;
 	private Predicate[] preds;
 
-	private boolean start = true;
-	private boolean isOpen;
+	private Schema schema;
 
 
   /**
@@ -20,8 +19,6 @@ public class Selection extends Iterator {
   public Selection(Iterator iter, Predicate... preds) {
 		this.it = iter;
 		this.preds = preds;
-		
-		isOpen = true;
   }
 
   /**
@@ -65,10 +62,27 @@ public class Selection extends Iterator {
    * @throws IllegalStateException if no more tuples
    */
   public Tuple getNext() {
-		return it.getNext();
+		Tuple currTuple = it.getNext();
+
+		for (int i=0; i<preds.length; i++) {
+			Predicate currPred = preds[i];
+			if (currPred.evaluate(currTuple)) {
+				return currTuple;
+			}
+		}
+
+		return new Tuple(it.getSchema());
+/*
+new Predicate(AttrOperator.GT, AttrType.FIELDNO, 3, AttrType.FLOAT, 65F),
+new Predicate(AttrOperator.LT, AttrType.FIELDNO, 3, AttrType.FLOAT, 15F)
+*/
   }
 
 	public Schema getSchema() {
 		return it.getSchema();
+	}
+
+	public void setSchema(Schema schema) {
+		this.schema = schema;
 	}
 }

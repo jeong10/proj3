@@ -26,8 +26,14 @@ public class Tuple {
    * @param schema logical information for the fields
    */
   public Tuple(Schema schema) {
-    this.schema = schema;
-    data = new byte[schema.getLength()];
+		if (schema != null) {
+	    this.schema = schema;
+	    data = new byte[schema.getLength()];
+		}
+//		else {
+//			this.schema = null;
+//			data = null;
+//		}
   }
 
   /**
@@ -242,6 +248,8 @@ public class Tuple {
    * Prints the tuple in a human-readable format.
    */
   public void print() {
+//		if (schema == null)
+//			return;
 
     // print everything as a string, with padding
     String str = null;

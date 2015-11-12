@@ -11,6 +11,7 @@ public class Projection extends Iterator {
 
 	private Schema originalSchema;
 	private Schema projectedSchema;
+	private Schema schema;
 
 
   /**
@@ -24,13 +25,14 @@ public class Projection extends Iterator {
 		projectedSchema = new Schema(currSchema.getCount() - fields.length);
 		originalSchema = new Schema(currSchema.getCount());
 
+		//	reserve original schema before projecting
 		for (int i=0; i<currSchema.getCount(); i++) {
 			originalSchema.initField(i, currSchema, i);
 		}
 
 
+		//	project schema
 		int index = 0;
-
 		for (int i=0; i<currSchema.getCount(); i++) {
 
 			//	check if current column is to be projected
@@ -125,5 +127,9 @@ public class Projection extends Iterator {
 
 	public Schema getSchema() {
 		return it.getSchema();
+	}
+
+	public void setSchema(Schema schema) {
+		this.schema = schema;
 	}
 }

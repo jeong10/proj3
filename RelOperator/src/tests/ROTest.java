@@ -132,8 +132,7 @@ class ROTest extends TestDriver {
 			Predicate[] preds = new Predicate[] {
 					new Predicate(AttrOperator.GT, AttrType.FIELDNO, 3, AttrType.FLOAT,
 							65F),
-							new Predicate(AttrOperator.LT, AttrType.FIELDNO, 3, AttrType.FLOAT,
-									15F) };
+							new Predicate(AttrOperator.LT, AttrType.FIELDNO, 3, AttrType.FLOAT, 15F) };
 			FileScan scan = new FileScan(s_drivers, file);
 			Selection sel = new Selection(scan, preds);
 			sel.execute();

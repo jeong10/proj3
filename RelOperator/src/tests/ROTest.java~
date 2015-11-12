@@ -119,7 +119,7 @@ class ROTest extends TestDriver {
 
 			// test index scan
 			saveCounts(null);
-index.printSummary();
+//index.printSummary();
 			System.out.println("\n  ~> test key scan (Age = 53.9)...\n");
 			SearchKey key = new SearchKey(53.9F);
 			KeyScan keyscan = new KeyScan(s_drivers, index, key, file);
