@@ -53,7 +53,7 @@ public class QEPTest extends TestDriver {
 
 
 	/**
-	 * Test application entry point; runs all tests.
+	 * Runs all tests.
 	 */
 	public static void main(String args[]) {
 
@@ -65,11 +65,11 @@ public class QEPTest extends TestDriver {
 
 
 		//	initialize schema info
-		emp_attr_types = new int[]{AttrType.INTEGER, AttrType.STRING, AttrType.INTEGER, AttrType.FLOAT, AttrType.INTEGER};
-		dep_attr_types = new int[]{AttrType.INTEGER, AttrType.STRING, AttrType.FLOAT, AttrType.FLOAT};
+		emp_attr_types = new int[] {AttrType.INTEGER, AttrType.STRING, AttrType.INTEGER, AttrType.FLOAT, AttrType.INTEGER};
+		dep_attr_types = new int[] {AttrType.INTEGER, AttrType.STRING, AttrType.FLOAT, AttrType.FLOAT};
 
-		emp_attr_size = new int[]{4, 20, 4, 10, 4};
-		dep_attr_size = new int[]{4, 20, 10, 10};
+		emp_attr_size = new int[] {4, 30, 4, 10, 4};
+		dep_attr_size = new int[] {4, 30, 10, 10};
 
 
 		//	read tables
@@ -233,9 +233,24 @@ public class QEPTest extends TestDriver {
 
 	/**
 	 * Display the Name for the departments with MinSalary = MaxSalary
+	 * SELECT Name FROM Department WHERE MinSalary = MaxSalary
 	 */
 	protected boolean test2() {
 		try {
+
+			//	test selection and projection
+			Predicate preds = new Predicate(AttrOperator.EQ, AttrType.FIELDNO, 2, AttrType.FIELDNO, 3);
+
+			FileScan scan = new FileScan(s_dep, dep_file);
+			Selection sel = new Selection(scan, preds);
+			Projection pro = new Projection(sel, 0, 2, 3);
+			pro.execute();
+
+
+			//	clean data
+			pro = null;
+			sel = null;
+			scan = null;
 
 			System.out.print("\n\nTest 2 completed without exception.");
 			return PASS;
