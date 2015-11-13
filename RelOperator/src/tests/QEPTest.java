@@ -27,6 +27,10 @@ public class QEPTest extends TestDriver {
 	private static final String TEST_NAME = "QEP tests";
 	private static final int SUPER_SIZE = 2000;
 
+	//	HeapFile objects storing tables
+	private static HeapFile emp_file;	
+	private static HeapFile dep_file;
+
 	//	schemas
 	private static Schema s_emp;
 	private static Schema s_dep;
@@ -56,9 +60,19 @@ public class QEPTest extends TestDriver {
 		//	create DB
 		QEPTest qep = new QEPTest();
 		qep.create_minibase();
+		emp_file = new HeapFile(null);
+		dep_file = new HeapFile(null);
 
 
-		//	read schemas
+		//	initialize schema info
+		emp_attr_types = new int[]{AttrType.INTEGER, AttrType.STRING, AttrType.INTEGER, AttrType.FLOAT, AttrType.INTEGER};
+		dep_attr_types = new int[]{AttrType.INTEGER, AttrType.STRING, AttrType.FLOAT, AttrType.FLOAT};
+
+		emp_attr_size = new int[]{4, 20, 4, 10, 4};
+		dep_attr_size = new int[]{4, 20, 10, 10};
+
+
+		//	read tables
 		String path = args[0];
 		File f = new File(path);
 		File[] tables = f.listFiles();
@@ -80,25 +94,82 @@ public class QEPTest extends TestDriver {
 
 							if (table.getName().equals("Employee.txt")) {
 
-								//	read Employee schema
+								//	read/create Employee schema
 								if (numLine == 0) {
 									String[] schemas = line.split(", ");
 									s_emp_size = schemas.length;
-									
+
+									emp_attr_name = new String[s_emp_size];									
 									for (int j=0; j<s_emp_size; j++) {
-//System.out.println(schemas[j]);
+										emp_attr_name[j] = schemas[j];
+									}
+
+									s_emp = new Schema(s_emp_size);
+									for (int i=0; i<s_emp_size; i++) {
+										s_emp.initField(i, emp_attr_types[i], emp_attr_size[i], emp_attr_name[i]);
 									}
 								}
 
-								//	read Employee data
+								//	read/create Employee data
 								else {
+									String[] dataArray = line.split(", ");
+									Tuple tuple = new Tuple(s_emp);
+
+									for (int j=0; j<dataArray.length; j++) {
+										if (j == 0 || j == 2 || j == 4) {
+											int data = Integer.parseInt(dataArray[j]);
+											tuple.setField(j, data);
+										}
+										else if (j == 3) {
+											float data = Float.parseFloat(dataArray[j]);
+											tuple.setField(j, data);
+										}
+										else {
+											tuple.setField(j, dataArray[j]);
+										}
+									}
+
+									tuple.insertIntoFile(emp_file);
 								}
 							}
 							else if (table.getName().equals("Department.txt")) {
 
-								//	read Department schema
+								//	read/create Department schema
 								if (numLine == 0) {
-									//
+									String[] schemas = line.split(", ");
+									s_dep_size = schemas.length;
+
+									dep_attr_name = new String[s_dep_size];
+									for (int j=0; j<s_dep_size; j++) {
+										dep_attr_name[j] = schemas[j];
+									}
+
+									s_dep = new Schema(s_dep_size);
+									for (int i=0; i<s_dep_size; i++) {
+										s_dep.initField(i, dep_attr_types[i], dep_attr_size[i], dep_attr_name[i]);
+									}
+								}
+
+								//	read/create Department data
+								else {
+									String[] dataArray = line.split(", ");
+									Tuple tuple = new Tuple(s_dep);
+
+									for (int j=0; j<dataArray.length; j++) {
+										if (j == 0) {
+											int data = Integer.parseInt(dataArray[j]);
+											tuple.setField(j, data);
+										}
+										else if (j == 2 || j == 3) {
+											float data = Float.parseFloat(dataArray[j]);
+											tuple.setField(j, data);
+										}
+										else {
+											tuple.setField(j, dataArray[j]);
+										}
+									}
+
+									tuple.insertIntoFile(dep_file);
 								}
 							}
 
@@ -108,33 +179,7 @@ public class QEPTest extends TestDriver {
 				catch (IOException e) {}
 			}
 		}
-//System.out.println("testing: " + path);
-
-		emp_attr_name = new String[s_emp_size];
-		dep_attr_name = new String[s_dep_size];
-
-
-		//	create Employee schema
-		//	EmpId, Name, Age, Salary, DeptID
-		s_emp = new Schema(s_emp_size);
-		emp_attr_types = new int[]{AttrType.INTEGER, AttrType.STRING, AttrType.INTEGER, AttrType.FLOAT, AttrType.INTEGER};
-		emp_attr_size = new int[]{4, 20, 4, 10, 4};
-
-		for (int i=0; i<s_emp_size; i++) {
-			s_emp.initField(i, emp_attr_types[i], emp_attr_size[i], emp_attr_name[i]);
-		}
-
-
-		//	create Department schema
-		//	DeptId, Name, MinSalary, MaxSalary
-		s_dep = new Schema(s_dep_size);
-		dep_attr_types = new int[]{AttrType.INTEGER, AttrType.STRING, AttrType.FLOAT, AttrType.FLOAT};
-		dep_attr_size = new int[]{4, 20, 10, 10};
-
-		for (int i=0; i<s_dep_size; i++) {
-			s_dep.initField(i, dep_attr_types[i], dep_attr_size[i], dep_attr_name[i]);
-		}
-
+		
 
 		//	run tests
 		boolean status = PASS;
@@ -157,35 +202,20 @@ public class QEPTest extends TestDriver {
 
 	/**
 	 * Display for each employee his ID, Name and Age
+	 * SELECT EmpId, Name, Age FROM Employee
 	 */
 	protected boolean test1() {
 		try {
 
-			int numTuple = 0;
-			Tuple tuple = new Tuple(s_emp);
-
-			HeapFile file = new HeapFile(null);
-			for (int i=0; i<numTuple; i++) {
-
-				// create the tuple
-				//tuple.setIntFld(0, i);
-				//tuple.setStringFld(2, "l" + i);
-
-				// insert the tuple in the file and index
-				//RID rid = file.insertRecord(tuple.getData());
-
-			}
-
 			//	test projection
-			//FileScan scan = new FileScan(s_emp, file);
-			//Projection pro = new Projection(scan, 3, 4);
-			//pro.execute();
+			FileScan scan = new FileScan(s_emp, emp_file);
+			Projection pro = new Projection(scan, 3, 4);
+			pro.execute();
 
 
 			//	clean data
-			//pro = null;
-			//scan = null;
-			file = null;
+			pro = null;
+			scan = null;
 
 			System.out.print("\n\nTest 1 completed without exception.");
 			return PASS;
@@ -207,6 +237,7 @@ public class QEPTest extends TestDriver {
 	protected boolean test2() {
 		try {
 
+			System.out.print("\n\nTest 2 completed without exception.");
 			return PASS;
 
 		} catch (Exception exc) {
