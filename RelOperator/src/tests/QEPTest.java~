@@ -202,8 +202,7 @@ public class QEPTest extends TestDriver {
 
 	/**
 	 * Display for each employee his ID, Name and Age
-	 * SELECT EmpId, Name, Age
-	 * FROM Employee
+	 * SELECT EmpId, Name, Age FROM Employee
 	 */
 	protected boolean test1() {
 		try {

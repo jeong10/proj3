@@ -10,7 +10,6 @@ public class Projection extends Iterator {
 	private Integer[] fields;
 
 	private Schema originalSchema;
-	private Schema projectedSchema;
 	private Schema schema;
 
 
@@ -21,19 +20,18 @@ public class Projection extends Iterator {
 		this.it = iter;
 		this.fields = fields;
 
-		Schema currSchema = it.getSchema();
-		projectedSchema = new Schema(currSchema.getCount() - fields.length);
-		originalSchema = new Schema(currSchema.getCount());
+		originalSchema = it.getSchema();
+		Schema projectedSchema = new Schema(originalSchema.getCount() - fields.length);
 
 		//	reserve original schema before projecting
-		for (int i=0; i<currSchema.getCount(); i++) {
-			originalSchema.initField(i, currSchema, i);
+		for (int i=0; i<originalSchema.getCount(); i++) {
+			originalSchema.initField(i, originalSchema, i);
 		}
 
 
 		//	project schema
 		int index = 0;
-		for (int i=0; i<currSchema.getCount(); i++) {
+		for (int i=0; i<originalSchema.getCount(); i++) {
 
 			//	check if current column is to be projected
 			boolean isProjected = false;
@@ -47,12 +45,12 @@ public class Projection extends Iterator {
 			}
 
 			if (!isProjected) {
-				projectedSchema.initField(index, currSchema, i);
+				projectedSchema.initField(index, originalSchema, i);
 				index++;
 			}
 		}
 
-		it.setSchema(projectedSchema);
+		this.schema = projectedSchema;
   }
 
   /**
@@ -98,7 +96,7 @@ public class Projection extends Iterator {
   public Tuple getNext() {
 		Tuple currTuple = it.getNext();
 		currTuple.schema = originalSchema;
-		Tuple retTuple = new Tuple(projectedSchema);
+		Tuple retTuple = new Tuple(this.schema);
 
 
 		//	project tuple's field
@@ -126,7 +124,7 @@ public class Projection extends Iterator {
   }
 
 	public Schema getSchema() {
-		return it.getSchema();
+		return schema;
 	}
 
 	public void setSchema(Schema schema) {

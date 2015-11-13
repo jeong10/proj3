@@ -19,6 +19,7 @@ public class Selection extends Iterator {
   public Selection(Iterator iter, Predicate... preds) {
 		this.it = iter;
 		this.preds = preds;
+		this.schema = iter.getSchema();
   }
 
   /**
@@ -72,14 +73,10 @@ public class Selection extends Iterator {
 		}
 
 		return new Tuple(it.getSchema());
-/*
-new Predicate(AttrOperator.GT, AttrType.FIELDNO, 3, AttrType.FLOAT, 65F),
-new Predicate(AttrOperator.LT, AttrType.FIELDNO, 3, AttrType.FLOAT, 15F)
-*/
   }
 
 	public Schema getSchema() {
-		return it.getSchema();
+		return schema;
 	}
 
 	public void setSchema(Schema schema) {

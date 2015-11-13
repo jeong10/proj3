@@ -9,26 +9,25 @@ public class SimpleJoin extends Iterator {
 	private Iterator outer;
 	private Iterator inner;
 	private Predicate[] preds;
+	private Schema schema;
 	
 	private boolean startJoin = true;
-	Tuple leftTuple;
-	
-	// boolean variable to indicate whether the pre-fetched tuple is consumed or not
 	private boolean nextTupleIsConsumed;
-	
-	// pre-fetched tuple
-	private Tuple nextTuple; 
+
+	private Tuple leftTuple;
+	private Tuple nextTuple;
+
 
 	/**
 	 * Constructs a join, given the left and right iterators and join predicates
 	 * (relative to the combined schema).
 	 */
-	public SimpleJoin(Iterator left, Iterator right, Predicate... preds) {
+	public SimpleJoin(Iterator outer, Iterator inner, Predicate... preds) {
 
-		this.outer = left;
-		this.inner = right;
+		this.outer = outer;
+		this.inner = inner;
 		this.preds = preds;
-		this.schema = Schema.join(left.schema, right.schema);
+		this.schema = Schema.join(outer.getSchema(), inner.getSchema());
 		
 		nextTupleIsConsumed = true;
 	}
@@ -38,8 +37,6 @@ public class SimpleJoin extends Iterator {
 	 * child iterators, and increases the indent depth along the way.
 	 */
 	public void explain(int depth) {
-		
-		throw new UnsupportedOperationException("Not implemented");
 	}
 
 	/**
@@ -55,11 +52,7 @@ public class SimpleJoin extends Iterator {
 	 * Returns true if the iterator is open; false otherwise.
 	 */
 	public boolean isOpen() {
-		
-		if (outer.isOpen())
-			return true;
-
-		return false;
+		return outer.isOpen();
 	}
 
 	/**
@@ -79,7 +72,7 @@ public class SimpleJoin extends Iterator {
 
 		if (!nextTupleIsConsumed)
 			return true;
-		
+
 		if (!outer.hasNext())
 		//if(!inner.hasNext() && !outer.hasNext()) // correction of a bug
 			return false;
@@ -121,8 +114,16 @@ public class SimpleJoin extends Iterator {
 	 * @throws IllegalStateException if no more tuples
 	 */
 	public Tuple getNext() {
-		
+
 		nextTupleIsConsumed = true;
 		return nextTuple;
+	}
+
+	public Schema getSchema() {
+		return schema;
+	}
+	
+	public void setSchema(Schema schema) {
+		this.schema = schema;
 	}
 }

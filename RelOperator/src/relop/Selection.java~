@@ -71,16 +71,11 @@ public class Selection extends Iterator {
 			}
 		}
 
-		return new Tuple(new Schema(0));
-//		return new Tuple(null);
-/*
-new Predicate(AttrOperator.GT, AttrType.FIELDNO, 3, AttrType.FLOAT, 65F),
-new Predicate(AttrOperator.LT, AttrType.FIELDNO, 3, AttrType.FLOAT, 15F)
-*/
+		return new Tuple(it.getSchema());
   }
 
 	public Schema getSchema() {
-		return it.getSchema();
+		return schema;
 	}
 
 	public void setSchema(Schema schema) {
